@@ -35,6 +35,8 @@ func resourceS3BucketCreate(d *schema.ResourceData, meta interface{}) error {
 	region := meta.(*s3Client).region
 	s3_client := meta.(*s3Client).s3Client
 
+	d.SetId(bucket)
+
 	if debug {
 		log.Printf("[DEBUG] Creating bucket: [%s] in region: [%s]", bucket, region)
 	}
@@ -42,6 +44,7 @@ func resourceS3BucketCreate(d *schema.ResourceData, meta interface{}) error {
 	err := s3_client.MakeBucket(bucket, region)
 	if err != nil {
 		log.Printf("[FATAL] Unable to create bucket [%s] in region [%s].  Failed with error: %v", bucket, region, err)
+		d.SetId("")
 		return errors.New(fmt.Sprintf("Unable to create bucket [%s] in region [%s].  Failed with error: %v", bucket, region, err))
 	}
 	if debug {
@@ -74,7 +77,7 @@ func resourceS3BucketUpdate(d *schema.ResourceData, meta interface{}) error {
 		log.Printf("[DEBUG] Bucket update operation not implemented. Bucket: [%s], Region: [%s]",
 			bucket, region)
 	}
-	return nil
+	return resourceS3BucketRead(d, meta)
 }
 
 func resourceS3BucketDelete(d *schema.ResourceData, meta interface{}) error {
